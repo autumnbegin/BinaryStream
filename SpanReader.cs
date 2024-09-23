@@ -210,20 +210,18 @@ namespace ProtocolStream
             return this.ReadBytes(length);
         }
 
-        public void CopyTo(byte[] target)
-        {
-            this.CopyTo(target.AsSpan());
-        }
-
-        public void CopyTo(Memory<byte> target)
-        {
-            this.CopyTo(target.Span);
-        }
-
-        public void CopyTo(Span<byte> target)
+        public void ReadTo(Span<byte> target)
         {
             var p = _bytePointer;
             var length = target.Length;
+            _bytePointer += length;
+            this.ValidatePointer();
+            Unsafe.CopyBlock(ref target[0], in _buffer[p], (uint)length);
+        }
+
+        public void ReadTo(Span<byte> target, int length)
+        {
+            var p = _bytePointer;
             _bytePointer += length;
             this.ValidatePointer();
             Unsafe.CopyBlock(ref target[0], in _buffer[p], (uint)length);
